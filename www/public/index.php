@@ -22,3 +22,40 @@
  *
  * Bon courage
  */
+
+// Récupère l'URL demandée
+
+$path = trim($_SERVER['REQUEST_URI'], '/');
+
+if ($path === "") {
+    $controllerName = "Base";
+    $method = "index";
+} else {
+    $parts = explode('/', $path);
+
+    $controllerName = ucfirst($parts[0]); 
+    $method = $parts[1] ?? "index";
+}
+
+$controllerFile = __DIR__ . "/Controller/" . $controllerName . ".php";
+
+if (!file_exists($controllerFile)) {
+    http_response_code(404);
+    die("Controller not found : $controllerName <br>");
+}
+
+require_once $controllerFile;
+
+if (!class_exists($controllerName)) {
+    die("Controller class not found : $controllerName <br>");
+}
+
+$controller = new $controllerName();
+
+if (!method_exists($controller, $method)) {
+    http_response_code(404);
+    die("Method not found : $method <br>");
+}
+
+$controller->$method();
+
